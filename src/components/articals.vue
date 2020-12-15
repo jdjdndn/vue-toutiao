@@ -14,14 +14,20 @@
         :error.sync="error"
         error-text="请求失败，点击重新加载"
       >
-        <van-cell v-for="(item, index) in list" :key="index" :title="item" />
+        <article-list
+          v-for="(item, index) in list"
+          :key="index"
+          :title="item"
+          :item='item'
+        ></article-list>
       </van-list>
     </van-pull-refresh>
   </div>
 </template>
 
 <script>
-import { getArtical } from '@/api/articals'
+import { getArtical } from "@/api/articals";
+import { ArticleList } from "./article_item";
 export default {
   props: {
     channel: {
@@ -37,9 +43,10 @@ export default {
       error: false,
       timestamp: null,
       isLoading: false,
-      refreshSuccessText: '刷新成功',
-    }
+      refreshSuccessText: "刷新成功",
+    };
   },
+  components: { ArticleList },
   methods: {
     async onLoad() {
       try {
@@ -49,22 +56,22 @@ export default {
           channel_id: this.channel.id, // 频道 id
           timestamp: this.timestamp || Date.now(), // 时间戳，请求新的推荐数据传当前的时间戳，请求历史推荐传指定的时间戳
           with_top: 1, // 是否包含置顶，进入页面第一次请求时要包含置顶文章，1-包含置顶，0-不包含
-        })
-        this.list.push(data.data)
+        });
+        this.list.push(data.data);
 
         // 加载状态结束
-        this.loading = false
+        this.loading = false;
         if (data.data.length > 0) {
           // 数据全部加载完成
-          this.timestamp = data.data.pre_timestamp
+          this.timestamp = data.data.pre_timestamp;
         } else {
           // 数据全部加载完成
-          this.finished = true
+          this.finished = true;
         }
       } catch (err) {
-        console.log(err, 'artical')
-        this.error = true
-        this.loading = false
+        console.log(err, "artical");
+        this.error = true;
+        this.loading = false;
       }
     },
     async onRefresh() {
@@ -75,16 +82,16 @@ export default {
           channel_id: this.channel.id, // 频道 id
           timestamp: Date.now(), // 时间戳，请求新的推荐数据传当前的时间戳，请求历史推荐传指定的时间戳
           with_top: 1, // 是否包含置顶，进入页面第一次请求时要包含置顶文章，1-包含置顶，0-不包含
-        })
-        this.list.unshift(data.data)
-        this.refreshSuccessText = `刷新成功,新增加${data.data.length}条数据`
+        });
+        this.list.unshift(data.data);
+        this.refreshSuccessText = `刷新成功,新增加${data.data.length}条数据`;
         // 加载状态结束
-        this.isLoading = false
+        this.isLoading = false;
       } catch (err) {
-        console.log(err, 'refresh')
-        this.error = true
-        this.isLoading = false
-        this.refreshSuccessText = '刷新失败'
+        console.log(err, "refresh");
+        this.error = true;
+        this.isLoading = false;
+        this.refreshSuccessText = "刷新失败";
       }
     },
   },
@@ -96,24 +103,22 @@ export default {
         channel_id: this.channel.id, // 频道 id
         timestamp: Date.now(), // 时间戳，请求新的推荐数据传当前的时间戳，请求历史推荐传指定的时间戳
         with_top: 1, // 是否包含置顶，进入页面第一次请求时要包含置顶文章，1-包含置顶，0-不包含
-      })
-      this.list.push(data.data)
-
+      });
+      this.list.push(data.data);
       // 加载状态结束
-      this.loading = false
+      this.loading = false;
     } catch (err) {
-      console.log(err, 'artical')
-      this.error = true
-      this.loading = false
+      console.log(err, "artical");
+      this.error = true;
+      this.loading = false;
     }
   },
-}
+};
 </script>
 
 <style lang="less" scoped>
 .artcile-list {
   height: 79vh;
   overflow: auto;
-  width: 40%;
 }
 </style>

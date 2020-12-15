@@ -20,41 +20,68 @@
         ><articals :channel="channel" />
       </van-tab>
       <div slot="nav-right" class="placeholder"></div>
-      <div slot="nav-right" class="hamburger-btn">
+      <div
+        slot="nav-right"
+        class="hamburger-btn"
+        @click="isChannelEditShow = true"
+      >
         <i class="iconfont iconshipin"></i>
       </div>
     </van-tabs>
+    <!-- 弹出层 -->
+    <van-popup
+      v-model="isChannelEditShow"
+      position="bottom"
+      close-icon-position="top-left"
+      closeable
+      :style="{ height: '100%' }"
+    >
+      <!-- 弹出层内部组件 -->
+      <ChannelEdit
+        :active="active"
+        :channels="channels"
+        @change-active="handleActiveChange"
+      />
+    </van-popup>
   </div>
 </template>
 
 <script>
-import Articals from '@/components/articals'
-import { getChannelList } from '@/api/user'
+import Articals from "@/components/articals";
+import ChannelEdit from "./components/channeledit";
+import { getChannelList } from "@/api/user";
 export default {
   data() {
     return {
       active: 0,
       channels: [],
-    }
+      isChannelEditShow: false, //是否展示弹出层组件
+    };
   },
   methods: {
     onLoad() {
-      this.loading = false
+      this.loading = false;
+    },
+    handleActiveChange(index) {
+      // console.log(index, "home");
+      this.isChannelEditShow = false;
+      this.active = index; //tab组件的active与弹出层组件index一一对应
     },
   },
   async created() {
     try {
-      const { data } = await getChannelList()
-      this.channels = data.data.channels
+      const { data } = await getChannelList();
+      this.channels = data.data.channels;
       // console.log(this.list)
     } catch (err) {
-      this.$toast('获取频道列表失败')
+      this.$toast("获取频道列表失败");
     }
   },
   components: {
     Articals,
+    ChannelEdit,
   },
-}
+};
 </script>
 
 <style lang="less" scoped>
@@ -78,7 +105,7 @@ export default {
     font-size: 33px;
   }
   &:before {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     width: 1px;
