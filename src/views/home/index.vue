@@ -1,6 +1,7 @@
+/* home页面 */
 <template>
   <div>
-    <van-nav-bar fixed class="page-nav-bar">
+    <van-nav-bar  class="page-nav-bar">
       <van-button
         round
         class="search"
@@ -8,11 +9,12 @@
         type="info"
         icon="search"
         size="mini"
+        to="/search"
         >搜索</van-button
       >
     </van-nav-bar>
 
-    <van-tabs v-model="active" animated swipeable>
+    <van-tabs v-model="active" animated swipeable :swipe-threshold="4">
       <van-tab
         :title="channel.name"
         v-for="(channel, index) in channels"
@@ -50,6 +52,8 @@
 import Articals from "@/components/articals";
 import ChannelEdit from "./components/channeledit";
 import { getChannelList } from "@/api/user";
+import { mapState } from "vuex";
+import { getItem } from "@/utils/storage";
 export default {
   data() {
     return {
@@ -62,17 +66,33 @@ export default {
     onLoad() {
       this.loading = false;
     },
-    handleActiveChange(index) {
+    handleActiveChange(index, isChannelEditShow = true) {
+      //isChannelEditShow = true默认不关闭
       // console.log(index, "home");
-      this.isChannelEditShow = false;
+      this.isChannelEditShow = isChannelEditShow;
       this.active = index; //tab组件的active与弹出层组件index一一对应
     },
   },
   async created() {
+    //根据登录未登录来判断从本地还是发请求获取数据,如果登录就发请求,未登录本地有就本地去,本地没有发请求
     try {
-      const { data } = await getChannelList();
-      this.channels = data.data.channels;
+      let tempChannels = []; //临时保存频道列表的数组
+      if (this.user) {
+        const { data } = await getChannelList();
+        tempChannels = data.data.channels;
+      } else {
+        //未登录
+        if (getItem("MY_CHANNELS")) {
+          //本地有我的频道列表
+          tempChannels = getItem("MY_CHANNELS");
+        } else {
+          //本地没有我的频道列表
+          const { data } = await getChannelList();
+          tempChannels = data.data.channels;
+        }
+      }
       // console.log(this.list)
+      this.channels = tempChannels;
     } catch (err) {
       this.$toast("获取频道列表失败");
     }
@@ -80,6 +100,9 @@ export default {
   components: {
     Articals,
     ChannelEdit,
+  },
+  computed: {
+    ...mapState(["user"]),
   },
 };
 </script>
@@ -114,8 +137,8 @@ export default {
     background-size: contain;
   }
 }
-/deep/.van-tabs.van-tabs--line {
-  position: fixed;
-  top: 102px;
-}
+// /deep/.van-tabs.van-tabs--line {
+//   position: fixed;
+//   top: 102px;
+// }
 </style>
